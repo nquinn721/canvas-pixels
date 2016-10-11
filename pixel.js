@@ -14,16 +14,52 @@ Pixel.prototype = {
 
     hex2rgb : function (hex, opacity) {
         hex = hex.replace('#','');
-        this.red = parseInt(hex.substring(0,2), 16);
-        this.green = parseInt(hex.substring(2,4), 16);
-        this.blue = parseInt(hex.substring(4,6), 16);
-        console.log(this.red, this.green, this.blue);
-        this.alpha = opacity || 100;
-
+        return [
+            parseInt(hex.substring(0,2), 16),
+            parseInt(hex.substring(2,4), 16),
+            parseInt(hex.substring(4,6), 16),
+            opacity
+        ];
     },
-    fill : function (hex) {
-        if(hex.indexOf('#') < 0)
-            hex = color(hex);
-        this.hex2rgb(hex, 100);
+
+
+    rgb2hex : function(colors) {
+        return "#" +
+            componentToHex(colors[0]) +
+            componentToHex(colors[1]) +
+            componentToHex(colors[2]);
+    },
+    hex2name : function (hex) {
+        return hexToNamed(hex);
+    },
+    getRGBA : function (rgba) {
+        var colors = rgba.replace(/[\(\)rgba]/g, '').split(',');
+        return colors;
+    },
+    setColor : function (red, green, blue, alpha) {
+        if(Array.isArray(red)){
+            alpha = red[3];
+            blue = red[2];
+            green = red[1];
+            red = red[0];
+        }
+        this.red = Number(red);
+        this.green = Number(green);
+        this.blue = Number(blue);
+        this.alpha = Number(alpha) || 100;
+    },
+    fill : function (color) {
+        var colors;
+        color = namedToHex(color) || color;
+
+        if(color.indexOf('#') > -1)
+            colors = this.hex2rgb(color, 100);
+
+        if(color.match('rgb'))
+            colors = this.getRGBA(color);
+
+        this.color = getColorFromHex(this.rgb2hex(colors));
+
+        this.setColor(colors);
     }
 }

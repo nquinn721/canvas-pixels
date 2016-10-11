@@ -7,6 +7,8 @@ function Img(ctx) {
     this.colPixels = [];
 
     this.ctx = ctx;
+    this.x = 6;
+    this.y = 6;
 
 }
 Img.prototype = {
@@ -14,11 +16,11 @@ Img.prototype = {
         this.img.onload = function () {
             this.img.style.display = 'none';
 
-            this.ctx.drawImage(this.img, 6, 6);
+            this.ctx.drawImage(this.img, this.x, this.y);
             this.imageData = this.ctx.getImageData(0, 0, canvas.width, canvas.height);
             this.data = this.imageData.data;
-            this.width = this.img.width;
-            this.height = this.img.height;
+            this.width = canvas.width;
+            this.height = canvas.height;
             this.convertToPixels();
 
             cb && cb();
@@ -28,7 +30,7 @@ Img.prototype = {
         var pixel, row, col;
         for (var i = 0; i < this.data.length; i += 4) {
             row = this.getRowNum(Math.floor(i / 4));
-            col = this.getColNum(Math.floor((i / 4)));
+            col = this.getColNum(Math.floor(i / 4));
             pixel = new Pixel({
                 red: this.data[i],
                 green: this.data[i + 1],
@@ -49,7 +51,7 @@ Img.prototype = {
             this.colPixels[col].push(pixel);
 
         }
-        console.log(this.pixels);
+
     },
     convertToImageData: function () {
         var arr = [],
@@ -87,12 +89,9 @@ Img.prototype = {
         var pixel,
             row = this.getRowNum(row),
             col = this.getColNum(col);
-        // console.log('row', row, 'col', col);
+
         if(this.rowPixels[row])
-            for(var i = 0; i < this.rowPixels[row].length; i++){
-                pixel = this.rowPixels[row][i];
-                if(pixel.col === col)return pixel;
-            }
+            return this.rowPixels[row][col];
 
     },
     getNextRowPixels : function (i) {
@@ -114,14 +113,35 @@ Img.prototype = {
         return this.getPixelByRowCol(i, i - 1);
     },
     getPixelUp : function (i) {
-        return this.getPixelByRowCol(i - 1, i);
+        return this.getPixelByRowCol(i - this.width, i);
+    },
+    getPixelUpRight : function (i) {
+        return this.getPixelByRowCol(i - this.width, i + 1);
+    },
+    getPixelUpLeft : function (i) {
+        return this.getPixelByRowCol(i - this.width, i - 1);
+    },
+    getPixelDownLeft : function (i) {
+        return this.getPixelByRowCol(i + this.width, i - 1);
+    },
+    getPixelDownRight : function (i) {
+        return this.getPixelByRowCol(i + this.width, i + 1);
     },
     getPixelDown : function (i) {
-        // console.log(i);
         return this.getPixelByRowCol(i + this.width, i);
     },
     getSurroundingPixels : function (i, distance) {
-
+        return [
+            this.getPixelUpLeft(i),
+            this.getPixelUp(i),
+            this.getPixelUpRight(i),
+            this.getPixelLeft(i),
+            this.getPixelByRowCol(i, i),
+            this.getPixelRight(i),
+            this.getPixelDownLeft(i),
+            this.getPixelDown(i),
+            this.getPixelDownRight(i)
+        ];
     },
     /**
      * END GETTERS

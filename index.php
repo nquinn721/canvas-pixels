@@ -6,13 +6,14 @@
     <style>
         canvas{
             border:1px solid black;
-            width:400px;
-            height:400px;
+            width:200px;
+            height:200px;
         }
     </style>
 </head>
 <body>
 <canvas id="game" width="50" height="50"></canvas>
+<canvas id="game" width="600" height="400"></canvas>
 <script src="nametohex.js"></script>
 <script src="pixel.js"></script>
 <script src="image.js"></script>
@@ -20,30 +21,27 @@
     var canvas = document.getElementById("game");
     var ctx = canvas.getContext("2d");
 
-
+var found;
     var image = new Img(ctx);
     image.init(function () {
-        var pixel, nextPixel, prevPixel, downPixel, prevRowPixel;
+        var pixel, pixels, nextPixel, prevPixel, downPixel, prevRowPixel;
         for(var i = 0; i < image.pixels.length; i++) {
             pixel = image.pixels[i];
-//            nextPixel = image.pixels[i + 1];
-//            prevPixel = image.pixels[i - 1];
+          if(pixel.alpha === 0) {
 
-//            if(i < 410)
-//              downPixel = image.getPixelDown(i);
-
-//        console.log(pixel.alpha)
-          if(pixel.alpha === 0){
-              pixel.fill('blue');
-          }else{
-
+              var pixels = image.getSurroundingPixels(i);
+              for (var j = 0; j < pixels.length; j++) {
+                  if (pixels[j] && pixels[j].alpha !== 0)
+                      pixels[j].fill('red');
+              }
           }
-
-
         }
         image.save();
 
     });
+    function num(pixel) {
+        return Math.random() * pixel.row & pixel.col;
+    }
 
     function fill(i, pos) {
         setGray(image.pixels[i]);
